@@ -1,0 +1,10 @@
+{
+    "C_Cpp.default.configurationProvider": "ms-vscode.makefile-tools",
+    "C_Cpp.default.compilerPath": "D:/msys64/mingw64/bin/arm-none-eabi-gcc.exe",
+    "Codegeex.RepoIndex": true,
+    "files.associations": {
+        "*.h": "c",
+        "FONT.H": "cpp"
+    },
+    "editor.fontFamily": "'Fira Code',Consolas, 'Courier New', monospace"
+}

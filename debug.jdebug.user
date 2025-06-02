@@ -1,0 +1,24 @@
+
+
+OpenDocument="startup_stm32f405xx.s", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/startup_stm32f405xx.s", Line=46
+OpenDocument="stm32f4xx_hal.c", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c", Line=311
+OpenDocument="stm32f4xx_hal_uart.c", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c", Line=3174
+OpenDocument="joy.c", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/Module/joy/joy.c", Line=0
+OpenDocument="stm32f4xx_hal_adc.c", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c", Line=1980
+OpenDocument="stm32f4xx_hal_spi.c", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/Drivers/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c", Line=853
+OpenDocument="main.c", FilePath="D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/Core/Src/main.c", Line=58
+OpenToolbar="Debug", Floating=0, x=0, y=0
+OpenWindow="Call Stack", DockArea=RIGHT, x=0, y=0, w=516, h=295, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Disassembly", DockArea=RIGHT, x=0, y=2, w=516, h=367, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Watched Data 1", DockArea=LEFT, x=0, y=0, w=515, h=961, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Data Sampling", DockArea=RIGHT, x=0, y=1, w=516, h=297, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
+OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=2560, h=323, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
+TableHeader="Call Stack", SortCol="Function", SortOrder="ASCENDING", VisibleCols=["Function";"Stack Frame";"Source";"PC";"Return Address";"Stack Used"], ColWidths=[280;149;194;100;112;100]
+TableHeader="Data Sampling Table", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time"], ColWidths=[100;100]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[100;100;100;100;100;100;100;107;107]
+TableHeader="Power Sampling", SortCol="Index", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
+TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh"], ColWidths=[238;173;100;100]
+TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[200;100;100;340]
+WatchedExpression="XboxControllerData", RefreshRate=5, Window=Watched Data 1
