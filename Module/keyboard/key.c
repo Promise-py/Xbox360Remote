@@ -75,6 +75,7 @@ void key_read(XboxControllerData_t *data) {
       }
     }
     LINE_CONTROL(i, high);
+    HAL_Delay(1);  // 延时1ms，防止抖动
   }
 
   Key_save(data);
@@ -94,6 +95,7 @@ void key_read(XboxControllerData_t *data) {
   data->btnStart = key[3][0];
   data->SWA = key[3][2];
   data->SWB = key[3][3];
+  data->SWC = key[3][1];
   if (HAL_GPIO_ReadPin(Xbox_GPIO_Port, Xbox_Pin) == GPIO_PIN_RESET)
     data->btnXbox = 1;
   else

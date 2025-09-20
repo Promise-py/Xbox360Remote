@@ -1,0 +1,5 @@
+D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/build/CMakeFiles/xbox_controller.dir
+D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/build/CMakeFiles/edit_cache.dir
+D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/build/CMakeFiles/rebuild_cache.dir
+D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/build/cmake/stm32cubemx/CMakeFiles/edit_cache.dir
+D:/DesktopFile/Competition/RC2025/xbox/xbox_controller/build/cmake/stm32cubemx/CMakeFiles/rebuild_cache.dir

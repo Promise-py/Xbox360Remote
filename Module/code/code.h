@@ -3,6 +3,7 @@
 
 #include "UI.h"
 #include "data_pool.h"
+#include "dma.h"
 #include "joy.h"
 #include "key.h"
 #include "usart.h"
@@ -12,13 +13,21 @@
 #define FRAME_END_0 0xFD
 #define FRAME_END_1 0xFE
 
-#define JOY_LVERT_MAX 3927
-#define JOY_LHORI_MAX 3319
+// 填最原始的adcvlaue数据
+// MAX稍微小点 MIN稍微大点，保证区域与真实值有重合
+#define JOY_LVERT_MAX 3000
+#define JOY_LVERT_MIN 1300
 
-#define JOY_RVERT_MAX 3450
-#define JOY_RHORI_MAX 3620
+#define JOY_LHORI_MAX 3225
+#define JOY_LHORI_MIN 1310
 
-#define JOY_Death_Zone 25
+#define JOY_RVERT_MAX 2970
+#define JOY_RVERT_MIN 1270
+
+#define JOY_RHORI_MAX 3500
+#define JOY_RHORI_MIN 1700
+
+#define JOY_Death_Zone 100
 
 const uint16_t CRC16Table[256] = {
     0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7, 0x8108,
@@ -71,6 +80,12 @@ union ui_data_t {
   float tensile;
 } ui_data_tensile;
 
+union ros_data_t {
+  uint8_t data[4];
+  float Data;
+} ros_data;
+
 void UART_SendData(XboxControllerData_t *command);
+void UART_ReceiveInit(void);
 
 #endif

@@ -3,6 +3,10 @@
 
 UI_DATA_t ui_data_;
 float pixel_pos[2];
+bool UI_Flag = false;
+uint8_t last_ros_flag = 10;
+uint8_t last_lock_finish = 10;
+uint8_t last_camera_flag = 10;
 
 void UI_FSM(XboxControllerData_t* XboxData) {
   if (XboxData->btnY && !XboxData->btnY_last) {
@@ -63,44 +67,69 @@ UI_DATA_t UI_Set_POS(XboxControllerData_t* command) {
   //   float vx = (int)((command->joyRHori - 32768) * SPEED_MAX / 32767 *
   //   LCD_COEFF * 0.01); float vy = (int)((command->joyRVert - 32768) *
   //   SPEED_MAX / 32767 * LCD_COEFF * 0.01);
-  ui_data_.UI_pos_last[0] = ui_data_.UI_pos[0];
-  ui_data_.UI_pos_last[1] = ui_data_.UI_pos[1];
-  if (command->joyRHori > 32768)
-    ui_data_.UI_pos[0]++;
-  else if (command->joyRHori < 32768)
-    ui_data_.UI_pos[0]--;
-  if (command->joyRVert > 32768)
-    ui_data_.UI_pos[1]--;
-  else if (command->joyRVert < 32768)
-    ui_data_.UI_pos[1]++;
 
-  // 出界限制
-  if (ui_data_.UI_pos[0] > 154)
-    ui_data_.UI_pos[0] = 154;
-  else if (ui_data_.UI_pos[0] < 6)
-    ui_data_.UI_pos[0] = 6;
+  UI_ROS_DATA_t ui_ros_data;
+  if (xQueueReceive(UI_RosPORT, &ui_ros_data, 0) == pdPASS) {
+    ui_data_.yolo_data_last = ui_data_.yolo_data;
+    ui_data_.lock_finish_flag = ui_ros_data.lock_finish_flag;
+    ui_data_.camera_flag = ui_ros_data.camera_flag;
+    ui_data_.yolo_data = ui_ros_data.yolo_data;
+  }
 
-  if (ui_data_.UI_pos[1] > 122)
-    ui_data_.UI_pos[1] = 122;
-  else if (ui_data_.UI_pos[1] < 6)
-    ui_data_.UI_pos[1] = 6;
+  if (ui_ros_data.lock_mode_flag == 1)
+    ui_data_.UI_Flag = manual_mode;
+  else if (ui_ros_data.lock_mode_flag == 0)
+    ui_data_.UI_Flag = init_mode;
+  else if (ui_ros_data.lock_mode_flag == 2)
+    ui_data_.UI_Flag = lock_mode;
+  else if (ui_ros_data.lock_mode_flag == 3)
+    ui_data_.UI_Flag = pass_mode;
+  else
+    ui_data_.UI_Flag = Finsih_Init;
 
-  ui_data_.world_pos_last[0] = ui_data_.world_pos[0];
-  ui_data_.world_pos_last[1] = ui_data_.world_pos[1];
+  /* 摇杆控制屏幕中的ui小车 */
 
-  ui_data_.world_pos[0] = ui_data_.UI_pos[0] * LCD_COEFF;
-  ui_data_.world_pos[1] = ui_data_.UI_pos[1] * LCD_COEFF;
+  // if (ui_data_.UI_Flag = Finsih_Init) {
+  //   ui_data_.UI_pos_last[0] = ui_data_.UI_pos[0];
+  //   ui_data_.UI_pos_last[1] = ui_data_.UI_pos[1];
+  //   if (command->joyRHori > 32768)
+  //     ui_data_.UI_pos[0]++;
+  //   else if (command->joyRHori < 32768)
+  //     ui_data_.UI_pos[0]--;
+  //   if (command->joyRVert > 32768)
+  //     ui_data_.UI_pos[1]--;
+  //   else if (command->joyRVert < 32768)
+  //     ui_data_.UI_pos[1]++;
 
-  ui_data_.UI_Tensile_last = ui_data_.UI_Tensile;
-  if (command->btnDirRight && !command->btnDirRight_last)
-    ui_data_.UI_Tensile += 1;
-  else if (command->btnDirUp && !command->btnDirUp_last)
-    ui_data_.UI_Tensile -= 1;
+  // // 出界限制
+  // if (ui_data_.UI_pos[0] > 154)
+  //   ui_data_.UI_pos[0] = 154;
+  // else if (ui_data_.UI_pos[0] < 6)
+  //   ui_data_.UI_pos[0] = 6;
 
-  if (ui_data_.UI_Tensile > Tensile_MAX)
-    ui_data_.UI_Tensile = 30;
-  else if (ui_data_.UI_Tensile < 0)
-    ui_data_.UI_Tensile = 0;
+  // if (ui_data_.UI_pos[1] > 122)
+  //   ui_data_.UI_pos[1] = 122;
+  // else if (ui_data_.UI_pos[1] < 6)
+  //   ui_data_.UI_pos[1] = 6;
+
+  // ui_data_.world_pos_last[0] = ui_data_.world_pos[0];
+  // ui_data_.world_pos_last[1] = ui_data_.world_pos[1];
+
+  // ui_data_.world_pos[0] = ui_data_.UI_pos[0] * LCD_COEFF;
+  // ui_data_.world_pos[1] = ui_data_.UI_pos[1] * LCD_COEFF;
+
+  // ui_data_.UI_Tensile_last = ui_data_.UI_Tensile;
+  // if (command->btnDirRight && !command->btnDirRight_last)
+  //   ui_data_.UI_Tensile += 1;
+  // else if (command->btnDirUp && !command->btnDirUp_last)
+  //   ui_data_.UI_Tensile -= 1;
+
+  // if (ui_data_.UI_Tensile > Tensile_MAX)
+  //   ui_data_.UI_Tensile = 30;
+  // else if (ui_data_.UI_Tensile < 0)
+  //   ui_data_.UI_Tensile = 0;
+  // }
+
   xQueueSendFromISR(UI_Port, &ui_data_, 0);
   return ui_data_;
 }
@@ -243,11 +272,160 @@ void UI_Path(UI_DATA_t* ui_data) {
     UI_Show_Tensile(ui_data_.UI_Tensile);
 }
 
-void UI_Show(UI_DATA_t* ui_data) { UI_Path(ui_data); }
+void UI_Carmera(UI_DATA_t* ui_data) {
+  static uint8_t lcd_clear = 0;
+  static uint8_t motor_flag = 0;
+  static uint8_t draw_flag = 0;
+  static uint8_t camera_flag_last = 0;
+  if (!lcd_clear) {
+    LCD_Clear(WHITE);
+    lcd_clear = 1;
+  }
 
+  if (ui_data->camera_flag) {
+    draw_flag = 0;
+    if (ui_data->camera_flag != camera_flag_last) {
+      LCD_Clear(WHITE);
+      camera_flag_last = ui_data->camera_flag;
+    }
 
+    if (ui_data->lock_finish_flag) {
+      if (!motor_flag) {
+        Show_Str(16, 20, RED, WHITE, "Finish locking", 20, 1);
 
+        // 电击震动
+        HAL_GPIO_WritePin(MOTOR1_GPIO_Port, MOTOR1_Pin, GPIO_PIN_SET);
+        HAL_GPIO_WritePin(MOTOR2_GPIO_Port, MOTOR2_Pin, GPIO_PIN_SET);
+        HAL_Delay(1000);  // 等待1秒
+        HAL_GPIO_WritePin(MOTOR1_GPIO_Port, MOTOR1_Pin, GPIO_PIN_RESET);
+        HAL_GPIO_WritePin(MOTOR2_GPIO_Port, MOTOR2_Pin, GPIO_PIN_RESET);
+        motor_flag = 1;
+      }
+    } else {
+      LCD_Fill(16, 20, 35, 50, WHITE);  // 清除显示finish区域
+      motor_flag = 0;
+    }
 
+    // if (ui_data->yolo_data_last != ui_data->yolo_data) {
+    //   LCD_Fill(16, 60, 160, 85, WHITE);  // 清除显示yolo区域
+    //   Show_Str(16, 60, BLACK, WHITE, "Yolo error:", 20, 1);
+    //   if (ui_data->yolo_data < 10)
+    //     LCD_ShowNum(100, 60, (int)ui_data->yolo_data, 1, 20);
+    //   else if (ui_data->yolo_data < 100 && ui_data->yolo_data > 9)
+    //     LCD_ShowNum(100, 60, (int)ui_data->yolo_data, 2, 20);
+    //   else if (ui_data->yolo_data < 1000 && ui_data->yolo_data > 99)
+    //     LCD_ShowNum(100, 60, (int)ui_data->yolo_data, 3, 20);
+    // }
+  } else  // 没看到篮筐
+  {
+    if (ui_data->camera_flag != camera_flag_last) {
+      LCD_Clear(WHITE);
+      camera_flag_last = ui_data->camera_flag;
+    }
+    if (!draw_flag) {
+      Gui_Drawbmp16(60, 50, 1);
+      draw_flag = 1;
+    }
+  }
+}
 
+void UI_Init(UI_DATA_t* ui_data) {
+  if (ui_data->UI_Flag == SW_Init) {
+    GUI_DrawFont16(16, 47, BLACK, WHITE, "??", 1);
+    GUI_DrawFont16(56, 63, BLACK, WHITE, "?", 1);
+  } else if (ui_data->UI_Flag == Joy_Init) {
+    GUI_DrawFont16(32, 47, BLACK, WHITE, "3", 1);
+    GUI_DrawFont16(24, 63, BLACK, WHITE, "4", 1);
+  }
+}
 
+void UI_Show(UI_DATA_t* ui_data) {
+  if (!UI_Flag) {
+    if (ui_data->UI_Flag == SW_Init) {
+      GUI_DrawFont16(16, 47, BLACK, WHITE, "??", 1);
+      GUI_DrawFont16(56, 63, BLACK, WHITE, "?", 1);
+      ui_data->UI_Flag_last = SW_Init;
+    } else if (ui_data->UI_Flag == Joy_Init) {
+      LCD_Clear(WHITE);
+      GUI_DrawFont16(32, 47, BLACK, WHITE, "3", 1);
+      GUI_DrawFont16(24, 63, BLACK, WHITE, "4", 1);
+    } else if (ui_data->UI_Flag == Finsih_Init &&
+               ui_data->UI_Flag_last == SW_Init) {
+      LCD_Clear(WHITE);
+      UI_Flag = true;
+      ui_data->UI_Flag_last = Finsih_Init;
+    }
+  } else {
+    if (ui_data->UI_Flag == Finsih_Init);
+      // LCD_Clear(WHITE);
+    // UI_Path(ui_data)
+    // else if (ui_data->UI_Flag == Lock_Basket)
+    //   UI_Carmera(ui_data);
+  }
+}
 
+void UI_show_state(UI_ROS_DATA_t *ui_ros)
+{
+
+  if (ui_ros->lock_mode_flag == init_mode && last_ros_flag!= init_mode) 
+  {
+    LCD_Clear(WHITE);
+    GUI_DrawFont16(24, 63, BLACK, WHITE, "5", 1);//舵轮校准中
+    last_ros_flag= init_mode;
+  }
+  else if(ui_ros->lock_mode_flag == manual_mode && last_ros_flag!= manual_mode) 
+  {
+    LCD_Clear(WHITE);
+    GUI_DrawFont16(24, 63, BLACK, WHITE, "6", 1);//手动模式
+    last_ros_flag= manual_mode;
+  }
+  else if(ui_ros->lock_mode_flag == lock_mode && last_ros_flag!= lock_mode) 
+  {
+    LCD_Clear(WHITE);
+    GUI_DrawFont16(24, 63, BLACK, WHITE, "7", 1);//自动锁框
+    last_ros_flag= lock_mode;
+  }
+  else if(ui_ros->lock_mode_flag == pass_mode && last_ros_flag!= pass_mode) 
+  {
+    LCD_Clear(WHITE);
+    GUI_DrawFont16(24, 63, BLACK, WHITE, "8", 1);//传球模式
+    last_ros_flag= pass_mode;
+  }
+  
+  if(ui_ros->lock_finish_flag==1 && last_lock_finish!= ui_ros->lock_finish_flag)
+  {
+    LCD_Clear(WHITE);
+    Show_Str(16, 20, RED, WHITE, "Finish locking", 20, 1);
+    // 电击震动
+    HAL_GPIO_WritePin(MOTOR1_GPIO_Port, MOTOR1_Pin, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(MOTOR2_GPIO_Port, MOTOR2_Pin, GPIO_PIN_SET);
+    HAL_Delay(1000);  // 等待1秒
+    HAL_GPIO_WritePin(MOTOR1_GPIO_Port, MOTOR1_Pin, GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(MOTOR2_GPIO_Port, MOTOR2_Pin, GPIO_PIN_RESET);
+    last_lock_finish = ui_ros->lock_finish_flag;
+  }
+  else if(ui_ros->lock_finish_flag==0 && last_lock_finish!= ui_ros->lock_finish_flag)
+  {
+    LCD_Fill(16, 20, 35, 50, WHITE);  // 清除显示finish区域
+    last_lock_finish = ui_ros->lock_finish_flag;
+  }
+  
+  if(ui_ros->camera_flag)
+  {
+    if(!last_camera_flag)
+    {
+      LCD_Fill(120, 1, 160, 41, WHITE); // 清除显示区域
+      last_camera_flag = ui_ros->camera_flag;
+    }
+    Gui_Drawbmp16(120,1,1);//显示相机
+  }
+  else
+  {
+    if(last_camera_flag)
+    {
+      LCD_Fill(120, 1, 160, 41, WHITE); // 清除显示区域
+      last_camera_flag = ui_ros->camera_flag;
+    }
+    Gui_Drawbmp16(120,1,2);//显示禁止
+  }
+}

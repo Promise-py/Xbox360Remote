@@ -4,7 +4,8 @@
     "Codegeex.RepoIndex": true,
     "files.associations": {
         "*.h": "c",
-        "FONT.H": "cpp"
+        "FONT.H": "cpp",
+        "memory": "c"
     },
     "editor.fontFamily": "'Fira Code',Consolas, 'Courier New', monospace"
 }

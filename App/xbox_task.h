@@ -15,6 +15,11 @@ XboxControllerData_t XboxControllerData;
 int a;
 uint8_t send_msgs[50];
 UI_DATA_t UI_Data;
+UI_DATA_t UI_Data_init;
+UI_ROS_DATA_t ui_ros;
+bool xbox_init_ = false;
+bool init_finish_flag = false;
+uint16_t joy_mid_check[6];
 /*任务节点创建区*/
 osThreadId uartTxTaskHandle;
 osThreadId StateGetTaskHandle;
@@ -35,7 +40,7 @@ void OSTASKInit(void) {
   // osThreadDef(uartTx, UartSendTask, osPriorityNormal, 0, 256);
   // uartTxTaskHandle = osThreadCreate(osThread(uartTx), NULL);
 
-  osThreadDef(state_get, StateGetTask, osPriorityNormal, 0, 256);
+  osThreadDef(state_get, StateGetTask, osPriorityAboveNormal, 0, 256);
   StateGetTaskHandle = osThreadCreate(osThread(state_get), NULL);
 
 #ifdef USE_IMU
@@ -60,6 +65,24 @@ void UartSendTask(void const *argument) {
 void StateGetTask(void const *argument) {
   for (;;) {
     key_read(&XboxControllerData);
+    if (!init_finish_flag) {
+      if (UI_Data_init.UI_Flag == SW_Init) {
+        if (XboxControllerData.SWA && !XboxControllerData.SWB &&
+            !XboxControllerData.SWC) {
+          UI_Data_init.UI_Flag = Joy_Init;
+        }
+      } else if (UI_Data_init.UI_Flag == Joy_Init) {
+        JOY_Init();  // 摇杆初始化
+        JOY_MID(joy_mid_check);
+        if (joy_mid_check[0] != 0) {  // 摇杆校准完成
+          UI_Data_init.UI_Flag = Finsih_Init;
+        }
+
+      } else if (UI_Data_init.UI_Flag == Finsih_Init) {
+        init_finish_flag = true;  // 设置为4，表示初始化完成
+      }
+      xQueueSendFromISR(UI_Port, &UI_Data_init, 0);
+    } else
     UART_SendData(&XboxControllerData);
     vTaskDelay(10);
   }
@@ -75,14 +98,19 @@ void INSTask(void const *argument) {
 
 void UITask(void const *argument) {
   LCD_Clear(WHITE);  // 清全屏白色
-  UI_Show(&UI_Data);
+  // UI_Show(&UI_Data);
   for (;;) {
-    if (xQueueReceive(UI_Port, &UI_Data, 0) == pdPASS) {
-      // LCD_Clear(WHITE);  // 清全屏白色
-      // LCD_SetWindows(0,0,lcddev.width-1,lcddev.height-1);
-      // LCD_SetWindows(0,0,159,127);
-      UI_Show(&UI_Data);
+    if (UI_Data.UI_Flag != Finsih_Init) {
+      if (xQueueReceive(UI_Port, &UI_Data, 0) == pdPASS) {
+        // LCD_Clear(WHITE);  // 清全屏白色
+        // LCD_SetWindows(0,0,lcddev.width-1,lcddev.height-1);
+        // LCD_SetWindows(0,0,159,127);
+        UI_Show(&UI_Data);
+      }
+    } else {
+      if (xQueueReceive(UI_RosPORT, &ui_ros, 0) == pdPASS)
+        UI_show_state(&ui_ros);
     }
-    vTaskDelay(1);
+    vTaskDelay(10);
   }
 }

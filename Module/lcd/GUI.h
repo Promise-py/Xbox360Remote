@@ -34,7 +34,7 @@ void GUI_DrawFont16(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint8_t *s
 void GUI_DrawFont24(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint8_t *s,uint8_t mode);
 void GUI_DrawFont32(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint8_t *s,uint8_t mode);
 void Show_Str(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint8_t *str,uint8_t size,uint8_t mode);
-void Gui_Drawbmp16(uint16_t x,uint16_t y,const unsigned char *p); //显示40*40 QQ图片
+void Gui_Drawbmp16(uint16_t x,uint16_t y,const unsigned char num); //显示40*40 QQ图片
 void gui_circle(int xc, int yc,uint16_t c,int r, int fill);
 void Gui_StrCenter(uint16_t x, uint16_t y, uint16_t fc, uint16_t bc, uint8_t *str,uint8_t size,uint8_t mode);
 void LCD_DrawFillRectangle(uint16_t x1, uint16_t y1, uint16_t x2, uint16_t y2);
